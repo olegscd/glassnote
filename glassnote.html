@@ -1617,8 +1617,9 @@ const onStageDown = e => {
   const wasEditing = !!te; commitText(); hideMenu();
   if (e.pointerType === 'pen') {
     if (!penSeen) { penSeen = true; if (db.settings.fingerDraws) toast('Stylus detected — fingers now scroll & zoom'); }
-    // Stylus always takes priority over an accidental palm pan/pinch
+    // Stylus always wins: cancel accidental palm pan/pinch, or commit a previous stroke whose pointerup was missed
     if (g && (g.type === 'pan' || g.type === 'pinch')) { cancelGesture(); touches.clear(); }
+    else if (g && g.type === 'draw' && g.id !== e.pointerId) { const prev = g; g = null; clearTimeout(prev.holdT); commitDraw(prev); }
   }
   try { stage.setPointerCapture(e.pointerId); } catch (_) {}
   const sp = loc(e);
@@ -2060,6 +2061,7 @@ const onStageDrop = async e => {
 };
 function bindStage(el, pane) {     // the same handlers drive both panes; a pane becomes active when touched
   const act = () => { if (activePane !== pane) { if (!pane.cur) return false; usePane(pane); } return true; };
+  el.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
   el.addEventListener('pointerdown', e => { if (act()) onStageDown(e); });
   el.addEventListener('pointermove', e => { if (activePane === pane) onStageMove(e); else updateEraserCursor(e); });
   el.addEventListener('pointerup', e => { if (activePane === pane) endPointer(e); });
