@@ -834,7 +834,10 @@ function save(noSync) {
   catch (e) { if (!warnedSave) { warnedSave = true; toast('Couldn’t save in this browser — use Export to keep a copy'); } }
   if (!noSync && typeof scheduleDriveSync === 'function') scheduleDriveSync();
 }
-const scheduleSave = () => { clearTimeout(saveTimer); saveTimer = setTimeout(save, 500); };
+const scheduleSave = () => {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { if (g) scheduleSave(); else save(); }, 900);
+};
 addEventListener('pagehide', () => save(true));
 addEventListener('beforeunload', () => save(true));
 
@@ -1678,6 +1681,7 @@ const onStageMove = e => {
     case 'draw': {
       const evs = (e.getCoalescedEvents && e.getCoalescedEvents()) || [];
       for (const ev of (evs.length ? evs : [e])) {
+        if (ev !== e && ev.clientX === 0 && ev.clientY === 0) continue; // WebKit/iPadOS coalesced-event bug guard
         if (Math.hypot(ev.clientX - g.last.x, ev.clientY - g.last.y) < .8) continue;
         const f = rawFrom(ev, g.pi, g.last); g.last = f.s;
         if (g.snap) { if (!g.snap.fixed) { g.snap = { ...g.snap, x2: f.r.x, y2: f.r.y }; } }
@@ -2062,6 +2066,8 @@ const onStageDrop = async e => {
 function bindStage(el, pane) {     // the same handlers drive both panes; a pane becomes active when touched
   const act = () => { if (activePane !== pane) { if (!pane.cur) return false; usePane(pane); } return true; };
   el.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
+  el.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+  el.addEventListener('gesturestart', e => e.preventDefault(), { passive: false });
   el.addEventListener('pointerdown', e => { if (act()) onStageDown(e); });
   el.addEventListener('pointermove', e => { if (activePane === pane) onStageMove(e); else updateEraserCursor(e); });
   el.addEventListener('pointerup', e => { if (activePane === pane) endPointer(e); });
@@ -2137,7 +2143,8 @@ let thumbT = 0, thumbDirty = new Set();
 function thumbSoon(i) {
   if (!cur || cur.layout !== 'paged') return;
   if (i < 0) cur.pages.forEach((_, k) => thumbDirty.add(k)); else thumbDirty.add(i);
-  clearTimeout(thumbT); thumbT = setTimeout(() => { thumbDirty.forEach(paintThumb); thumbDirty.clear(); }, 300);
+  clearTimeout(thumbT);
+  thumbT = setTimeout(() => { if (g) { thumbSoon(i); return; } thumbDirty.forEach(paintThumb); thumbDirty.clear(); }, 500);
 }
 function updateCounter() {
   if (!cur || ctxInactive) return;
