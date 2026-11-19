@@ -1,0 +1,25 @@
+[package]
+name = "glassnote"
+version = "0.3.0"
+description = "Glassnote — Liquid Glass handwriting notebook"
+authors = ["Olegs"]
+edition = "2021"
+
+[lib]
+name = "glassnote_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["unstable"] }
+tauri-plugin-dialog = "2"
+base64 = "0.22"
+
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true

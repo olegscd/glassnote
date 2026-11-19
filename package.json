@@ -1,0 +1,20 @@
+{
+  "name": "glassnote",
+  "version": "0.3.0",
+  "private": true,
+  "description": "Liquid Glass handwriting notebook + whiteboard in a single HTML file",
+  "type": "module",
+  "scripts": {
+    "start": "npx --yes http-server -c-1 -p 5173 -o /glassnote.html .",
+    "collab": "node scripts/collab-server.mjs",
+    "test": "node tests/smoke.mjs",
+    "test:headed": "node tests/smoke.mjs --headed",
+    "app": "node scripts/copy-web.mjs && tauri dev",
+    "build:exe": "node scripts/copy-web.mjs && tauri build",
+    "tauri": "tauri"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2",
+    "playwright": "^1.48.0"
+  }
+}

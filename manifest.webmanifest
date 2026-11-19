@@ -1,0 +1,18 @@
+{
+  "name": "Glassnote",
+  "short_name": "Glassnote",
+  "description": "Liquid Glass handwriting notebook and whiteboard",
+  "start_url": "./glassnote.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#7f7fd5",
+  "theme_color": "#7f7fd5",
+  "icons": [
+    {
+      "src": "./icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
