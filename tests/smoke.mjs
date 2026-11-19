@@ -245,6 +245,10 @@ try {
 
   step = 'dark mode + cute custom themes + assets';
   await page.click('#edSettings'); await page.click('#setTabs button:has-text("Theme")');
+  await page.click('#themePresets .theme-tile:has-text("Snoopy")');
+  await page.waitForTimeout(250);
+  check(await page.evaluate(() => db.settings.scene === 'snoopy' && document.body.classList.contains('theme-snoopy') && !!document.querySelector('#wallArt img') && !!document.querySelector('#buddy img')), 'Snoopy Monochrome theme applies full monochrome UI, wallpaper & hot-air balloon buddy');
+  await page.screenshot({ path: path.join(shots, '07c-snoopy.png') });
   await page.click('#themePresets .theme-tile:has-text("Dreamland")');
   await page.waitForTimeout(250);
   check(await page.evaluate(() => db.settings.scene === 'poyo' && !!document.querySelector('#buddy svg') && !!document.querySelector('#wallArt svg')), 'Dreamland theme renders pink puff buddy & sky art');
