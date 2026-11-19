@@ -313,6 +313,11 @@ body.dark #pbody{background:rgba(0,0,0,.25)}
 #pbody>*{position:absolute;inset:0;width:100%;height:100%;border:0}
 .pimg{overflow:auto;background:#fff}
 .pimg img{width:100%;display:block;cursor:grab}
+.ppdf{overflow:auto;-webkit-overflow-scrolling:touch;background:rgba(0,0,0,.06);padding:12px;display:flex;flex-direction:column;align-items:center;gap:12px;touch-action:pan-x pan-y}
+body.dark .ppdf{background:rgba(0,0,0,.35)}
+.ppdf canvas{display:block;background:#fff;border-radius:4px;box-shadow:0 4px 16px -4px rgba(0,0,0,.3);flex:none}
+.ppdf-z{margin-left:auto;display:flex;align-items:center;gap:2px}
+.ppdf-z .btn{height:30px;min-width:30px;padding:0 6px;font-size:12px;font-variant-numeric:tabular-nums}
 .pempty{display:flex;flex-direction:column;gap:10px;justify-content:center;padding:26px}
 .pempty h3{font-size:16px;margin-bottom:4px}
 .pempty p{font-size:12.5px;opacity:.6;line-height:1.45}
@@ -2486,7 +2491,7 @@ async function makeDocEl(doc) {
   const blob = await fileStore.get(doc.id);
   if (!blob) return el('div', 'pmsg', 'This file isn’t stored on this device any more — close the tab and open it again.');
   const url = URL.createObjectURL(blob);
-  if (doc.type === 'pdf') { const f = el('iframe'); f.src = url + '#view=FitH'; f.title = doc.name; return f; }
+  if (doc.type === 'pdf') return makePdfView(doc, blob, url);
   const box = el('div', 'pimg'), im = el('img'); im.src = url; im.alt = doc.name; im.draggable = true;
   im.ondragstart = e => { e.dataTransfer.setData('text/x-glassnote-file', doc.id); e.dataTransfer.effectAllowed = 'copy'; };
   box.append(im); return box;
@@ -2519,11 +2524,70 @@ function renderActions(doc) {        // per-type buttons under the panel tabs
   const bar = $('#pact'); bar.innerHTML = '';
   const add = (ic, label, fn, primary) => { const b = el('button', 'btn ' + (primary ? 'primary' : 'ghost'), icon(ic) + '<span></span>'); $('span', b).textContent = label; b.onclick = fn; bar.append(b); };
   if (!doc || doc.type === 'web') { bar.classList.add('hidden'); return; }
-  if (doc.type === 'pdf') add('pen', 'Write on this PDF', async () => { const b = await fileStore.get(doc.id); if (b) importPdf(b, doc.name); }, true);
+  if (doc.type === 'pdf') {
+    add('pen', 'Write on this PDF', async () => { const b = await fileStore.get(doc.id); if (b) importPdf(b, doc.name); }, true);
+    const zbox = el('div', 'ppdf-z');
+    const zb = (ic, title, fn, txt) => { const b = el('button', 'btn ghost', txt || icon(ic)); b.title = title; b.onclick = fn; zbox.append(b); return b; };
+    zb('zoomOut', 'Zoom out PDF', () => setPdfZoom(doc, (doc.z || 1) / 1.25));
+    const pct = zb('', 'Reset PDF zoom', () => setPdfZoom(doc, 1), Math.round((doc.z || 1) * 100) + '%'); pct.id = 'pdfZoomPct';
+    zb('zoomIn', 'Zoom in PDF', () => setPdfZoom(doc, (doc.z || 1) * 1.25));
+    bar.append(zbox);
+  }
   else if (doc.type === 'img') add('image', 'Put on page', async () => { const b = await fileStore.get(doc.id); if (!cur) return toast('Open a notebook first'); if (b) insertImage(new File([b], doc.name, { type: b.type })); });
   else if (doc.type === 'note') { add('book', 'Make it the main tab', () => { const id = doc.nbId; closeDoc(doc.id); openNotebook(id); }); add('pages', 'Other notebook…', e => pickSideNotebook(e.currentTarget)); }
   bar.classList.remove('hidden');
 }
+async function makePdfView(doc, blob, fallbackUrl) {
+  let lib;
+  try { lib = await loadPdfJs(); } catch (_) {
+    const f = el('iframe'); f.src = fallbackUrl + '#view=FitH'; f.title = doc.name; return f;
+  }
+  URL.revokeObjectURL(fallbackUrl);
+  const wrap = el('div', 'ppdf');
+  let pdf;
+  try { pdf = await lib.getDocument({ data: new Uint8Array(await blob.arrayBuffer()) }).promise; }
+  catch (_) { wrap.append(el('div', 'pmsg', 'Couldn’t open that PDF.')); return wrap; }
+  doc.z = clamp(doc.z || 1, .5, 4);
+  const canvases = [];
+  wrap._applyZoom = () => {
+    const baseW = Math.max(240, (wrap.clientWidth || P().w || 460) - 24);
+    canvases.forEach(({ c, ar }) => { c.style.width = Math.round(baseW * doc.z) + 'px'; c.style.height = Math.round(baseW * doc.z * ar) + 'px'; });
+    const pct = $('#pdfZoomPct'); if (pct && P().active === doc.id) pct.textContent = Math.round(doc.z * 100) + '%';
+  };
+  // Two-finger pinch-to-zoom on iPad/touch + Ctrl+wheel on PC
+  let pinchD0 = 0, pinchZ0 = 1;
+  wrap.addEventListener('touchstart', e => {
+    if (e.touches.length === 2) { pinchD0 = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY) || 1; pinchZ0 = doc.z || 1; }
+  }, { passive: true });
+  wrap.addEventListener('touchmove', e => {
+    if (e.touches.length === 2 && pinchD0) {
+      e.preventDefault();
+      const d = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+      doc.z = clamp(pinchZ0 * d / pinchD0, .5, 4); wrap._applyZoom();
+    }
+  }, { passive: false });
+  wrap.addEventListener('touchend', () => { if (pinchD0) { pinchD0 = 0; scheduleSave(); } }, { passive: true });
+  wrap.addEventListener('wheel', e => {
+    if (e.ctrlKey || e.metaKey) { e.preventDefault(); setPdfZoom(doc, (doc.z || 1) * Math.exp(-e.deltaY * .003)); }
+  }, { passive: false });
+  new ResizeObserver(() => wrap._applyZoom()).observe(wrap);
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i), v0 = page.getViewport({ scale: 1 });
+    const scale = Math.min(2.2, 1600 / Math.max(v0.width, v0.height)), vp = page.getViewport({ scale });
+    const c = el('canvas'); c.width = Math.ceil(vp.width); c.height = Math.ceil(vp.height);
+    const ar = v0.height / v0.width;
+    canvases.push({ c, ar }); wrap.append(c);
+    wrap._applyZoom();
+    await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+  }
+  return wrap;
+}
+function setPdfZoom(doc, z) {
+  doc.z = clamp(r2(z), .5, 4);
+  const elm = panelEls.get(doc.id); if (elm && elm._applyZoom) elm._applyZoom();
+  scheduleSave();
+}
+
 async function openPanelFiles(list) {
   let n = 0;
   for (const f of list) {

@@ -1,5 +1,5 @@
 // Glassnote offline Service Worker — caches the app shell so iPad/Android Home Screen works 100% offline.
-const CACHE = 'glassnote-offline-v4';
+const CACHE = 'glassnote-offline-v5';
 const ASSETS = ['./glassnote.html', './manifest.webmanifest', './icon.png', './vendor/pdfjs.js'];
 
 self.addEventListener('install', e => {
