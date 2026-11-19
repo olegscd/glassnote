@@ -54,12 +54,28 @@ svg{width:20px;height:20px;flex:none}
 .hidden{display:none!important}
 
 #wall{position:fixed;inset:0;z-index:0;overflow:hidden;background:var(--bg);transition:background .4s}
-.blob{position:absolute;width:58vmax;height:58vmax;border-radius:50%;filter:blur(70px);opacity:.8;animation:drift 30s ease-in-out infinite alternate;transition:background .4s}
+.blob{position:absolute;width:58vmax;height:58vmax;border-radius:50%;filter:blur(70px);opacity:.8;animation:drift 30s ease-in-out infinite alternate;transition:background .4s,opacity .35s}
 .b1{background:var(--wall-1);left:-18vmax;top:-18vmax}
 .b2{background:var(--wall-2);right:-22vmax;top:4vmax;animation-duration:36s;animation-delay:-9s}
 .b3{background:var(--wall-3);left:18vmax;bottom:-28vmax;animation-duration:42s;animation-delay:-17s}
 body.dark .blob{opacity:.42}
+body.has-wall-img .blob{opacity:.25}
+#wallImg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;pointer-events:none;transition:opacity .35s}
+body.has-wall-img #wallImg{opacity:.9}
+body.dark.has-wall-img #wallImg{opacity:.55}
+#wallArt{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+#wallArt svg{width:100%;height:100%;display:block}
+#wallArt .wfloat{animation:wallFloat 12s ease-in-out infinite alternate}
+#wallArt .wtwinkle{animation:twinkle 3.4s ease-in-out infinite alternate}
+#buddy{position:fixed;right:calc(18px + var(--pr));bottom:calc(82px + var(--safe-b));z-index:15;pointer-events:none;width:var(--buddy-size,88px);height:var(--buddy-size,88px);display:grid;place-items:center;filter:drop-shadow(0 8px 16px rgba(0,0,0,.18));animation:buddyBob 4.2s ease-in-out infinite;transition:right .32s,bottom .25s,opacity .25s,transform .25s}
+body.tb-top #buddy{bottom:calc(18px + var(--safe-b))}
+body.editor #buddy{opacity:.88}
+#buddy:empty{display:none}
+#buddy svg,#buddy img{width:100%;height:100%;object-fit:contain;display:block}
 @keyframes drift{to{transform:translate(9vmax,7vmax) scale(1.18)}}
+@keyframes wallFloat{from{transform:translate3d(0,0,0)}to{transform:translate3d(14px,-12px,0)}}
+@keyframes buddyBob{0%,100%{transform:translateY(0) rotate(-1.5deg)}50%{transform:translateY(-8px) rotate(1.5deg)}}
+@keyframes twinkle{0%,100%{opacity:.55;transform:scale(.94)}50%{opacity:1;transform:scale(1.06)}}
 
 /* ---------- liquid glass ---------- */
 .glass{
@@ -207,6 +223,7 @@ body.dark .seg{background:rgba(255,255,255,.08)}
 .seg button.on{background:rgba(var(--glass-tint),.95);box-shadow:0 2px 6px rgba(0,0,0,.12)}
 body.dark .seg button.on{background:rgba(255,255,255,.16)}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
 .colorf{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11.5px;opacity:.85}
 .colorf input{width:44px;height:44px;border:0;border-radius:50%;padding:0;background:none;cursor:pointer;overflow:hidden}
 .colorf input::-webkit-color-swatch-wrapper{padding:0}.colorf input::-webkit-color-swatch{border:0;border-radius:50%}
@@ -329,10 +346,24 @@ body.dark .ppdf{background:rgba(0,0,0,.35)}
 body.panel-open #panelPull{display:none}
 body.resizing,body.resizing *{cursor:ew-resize!important;user-select:none}
 body.resizing iframe{pointer-events:none}
-.themes{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:10px}
-.themes button{height:62px;border-radius:14px;display:flex;align-items:flex-end;padding:7px 9px;font-size:12px;font-weight:600;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.35);box-shadow:inset 0 0 0 1px rgba(255,255,255,.45),0 4px 12px -4px rgba(0,0,0,.35);position:relative}
-.themes button.on{outline:2.5px solid var(--accent);outline-offset:2px}
-.themes button i{position:absolute;right:8px;top:8px;width:14px;height:14px;border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,.85)}
+.themes{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px}
+.theme-item{position:relative}
+.theme-tile{width:100%;height:50px;border-radius:14px;display:flex;align-items:flex-end;padding:6px 8px;font-size:11.5px;font-weight:600;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.35);box-shadow:inset 0 0 0 1px rgba(255,255,255,.45),0 4px 12px -4px rgba(0,0,0,.28);position:relative;text-align:left;transition:transform .16s cubic-bezier(.3,1.6,.5,1)}
+.theme-tile:active{transform:scale(.95)}
+.theme-tile.light-tile{color:#2c2530;text-shadow:0 1px 2px rgba(255,255,255,.75);box-shadow:inset 0 0 0 1px rgba(255,255,255,.7),0 4px 12px -4px rgba(0,0,0,.14)}
+.theme-tile.on{outline:2.5px solid var(--accent);outline-offset:2px}
+.theme-tile i{position:absolute;right:8px;top:8px;width:14px;height:14px;border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,.9)}
+.theme-del{position:absolute;left:6px;top:6px;width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.42);color:#fff;font-size:13px;line-height:1;display:grid;place-items:center;backdrop-filter:blur(6px)}
+.theme-del.armed{background:#ff3b30;width:auto;padding:0 7px;border-radius:999px;font-size:10.5px;font-weight:700}
+.theme-save{display:flex;gap:8px;margin-top:10px;align-items:center}
+.theme-save .input{flex:1;min-width:0;height:38px}
+.theme-save .btn{height:38px;font-size:13px}
+.themes-empty{grid-column:1/-1;font-size:12px;opacity:.58;padding:4px 2px}
+.asset-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid rgba(127,127,127,.15);font-size:14.5px}
+.asset-row small{display:block;font-size:11.5px;opacity:.58}
+.asset-acts{display:flex;align-items:center;gap:6px;flex:none}
+.asset-acts .btn{height:32px;padding:0 11px;font-size:12.5px}
+.asset-thumb{width:32px;height:32px;border-radius:8px;object-fit:cover;box-shadow:inset 0 0 0 1px rgba(127,127,127,.25);background:rgba(127,127,127,.12)}
 .pane{margin-top:16px}
 .pane:not(.on){display:none}
 .custom-tone{display:flex;gap:18px;margin-top:12px}
@@ -382,7 +413,8 @@ body.dark .live-pill{color:#30d158;background:rgba(48,209,88,.18)}
   </filter>
 </svg>
 
-<div id="wall"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i></div>
+<div id="wall"><i class="blob b1"></i><i class="blob b2"></i><i class="blob b3"></i><div id="wallArt" aria-hidden="true"></div><img id="wallImg" alt=""></div>
+<div id="buddy" aria-hidden="true"></div>
 
 <!-- ============ TAB STRIP ============ -->
 <nav id="tabbar" class="glass">
@@ -456,9 +488,23 @@ body.dark .live-pill{color:#30d158;background:rgba(48,209,88,.18)}
     <div class="pane" data-pane="page" id="pagePane"></div>
     <div class="pane" data-pane="theme">
       <div class="field"><span>Theme presets</span><div class="themes" id="themePresets"></div></div>
+      <div class="field"><span>Custom themes</span><div class="themes" id="customThemes"></div><div class="theme-save"><input class="input" id="customThemeName" maxlength="24" placeholder="Name your theme…"><button class="btn primary" id="saveCustomTheme">Save current</button></div></div>
+      <div class="field"><span>Scene art &amp; companion</span><div class="seg" id="themeSceneSeg"></div></div>
+      <div class="asset-row">
+        <div><span>Wallpaper image</span><small id="wallImgMeta">Use any image (Kirby, aesthetic art, photo)</small></div>
+        <div class="asset-acts"><img class="asset-thumb hidden" id="wallImgThumb" alt=""><button class="btn ghost" id="pickWallImg">Choose</button><button class="btn ghost danger hidden" id="clearWallImg">Clear</button></div>
+      </div>
+      <div class="asset-row">
+        <div><span>Corner sticker</span><small id="buddyImgMeta">Optional custom PNG / GIF mascot</small></div>
+        <div class="asset-acts"><img class="asset-thumb hidden" id="buddyImgThumb" alt=""><button class="btn ghost" id="pickBuddyImg">Choose</button><button class="btn ghost danger hidden" id="clearBuddyImg">Clear</button></div>
+      </div>
+      <label class="field"><span>Sticker size <em data-out="buddySize"></em></span><input type="range" min="48" max="150" step="2" data-set="buddySize"></label>
+      <input type="file" id="wallImgFile" accept="image/*" hidden>
+      <input type="file" id="buddyImgFile" accept="image/*" hidden>
       <div class="field"><span>Colours</span>
-        <div class="grid4">
+        <div class="grid5">
           <label class="colorf"><input type="color" data-set="accent">Accent</label>
+          <label class="colorf"><input type="color" data-set="wallBg">Base</label>
           <label class="colorf"><input type="color" data-set="wall1">Glow 1</label>
           <label class="colorf"><input type="color" data-set="wall2">Glow 2</label>
           <label class="colorf"><input type="color" data-set="wall3">Glow 3</label>
@@ -634,14 +680,22 @@ const CONFIG = {
   ],
   /* Theme presets in Settings → Theme: any db.settings keys */
   themes: [
-    { name: 'Sunset',   set: { accent: '#0a84ff', wall1: '#ff9a8b', wall2: '#7f7fd5', wall3: '#86e3ce', dark: false, alpha: .22 } },
-    { name: 'Ocean',    set: { accent: '#0a84ff', wall1: '#4facfe', wall2: '#00f2fe', wall3: '#a18cd1', dark: false, alpha: .2 } },
-    { name: 'Forest',   set: { accent: '#30b158', wall1: '#134e5e', wall2: '#71b280', wall3: '#d4fc79', dark: false, alpha: .24 } },
-    { name: 'Rose',     set: { accent: '#ff375f', wall1: '#ffafbd', wall2: '#ffc3a0', wall3: '#c471f5', dark: false, alpha: .22 } },
-    { name: 'Peach',    set: { accent: '#ff9f0a', wall1: '#ffecd2', wall2: '#fcb69f', wall3: '#ff8177', dark: false, alpha: .22 } },
-    { name: 'Midnight', set: { accent: '#5e5ce6', wall1: '#1d2b64', wall2: '#4b1d64', wall3: '#0f3443', dark: true, alpha: .18 } },
-    { name: 'Neon',     set: { accent: '#f72585', wall1: '#f72585', wall2: '#4361ee', wall3: '#4cc9f0', dark: true, alpha: .16 } },
-    { name: 'Graphite', set: { accent: '#8e8e93', wall1: '#3a3a40', wall2: '#6b6b75', wall3: '#202024', dark: true, alpha: .2 } },
+    { name: 'Dreamland',  set: { accent: '#ff4d88', wallBg: '#ffeaf3', wall1: '#ffb3d1', wall2: '#ffd6e7', wall3: '#fff0a8', dark: false, alpha: .26, radius: 26, scene: 'poyo' } },
+    { name: 'Sakura',     set: { accent: '#f45b84', wallBg: '#fff1f5', wall1: '#ffc2d6', wall2: '#ffb3c6', wall3: '#ffe5ec', dark: false, alpha: .26, radius: 26, scene: 'sakura' } },
+    { name: 'Matcha',     set: { accent: '#588157', wallBg: '#f2f7ef', wall1: '#b7e4c7', wall2: '#d8f3dc', wall3: '#e9edc9', dark: false, alpha: .26, radius: 24, scene: 'none' } },
+    { name: 'Lavender',   set: { accent: '#8b5cf6', wallBg: '#f5f2ff', wall1: '#ddd6fe', wall2: '#fbcfe8', wall3: '#c7d2fe', dark: false, alpha: .25, radius: 26, scene: 'none' } },
+    { name: 'Honey',      set: { accent: '#f59e0b', wallBg: '#fffbeb', wall1: '#fde68a', wall2: '#fed7aa', wall3: '#fef3c7', dark: false, alpha: .26, radius: 26, scene: 'none' } },
+    { name: 'Cloud',      set: { accent: '#38bdf8', wallBg: '#eef8ff', wall1: '#bae6fd', wall2: '#e0f2fe', wall3: '#ddd6fe', dark: false, alpha: .26, radius: 26, scene: 'none' } },
+    { name: 'Mocha',      set: { accent: '#d4a373', wallBg: '#1c1512', wall1: '#6c4f3d', wall2: '#9c6644', wall3: '#3d2b22', dark: true,  alpha: .22, radius: 24, scene: 'none' } },
+    { name: 'Berry',      set: { accent: '#c084fc', wallBg: '#181224', wall1: '#6d28d9', wall2: '#be185d', wall3: '#312e81', dark: true,  alpha: .20, radius: 26, scene: 'starry' } },
+    { name: 'Sunset',     set: { accent: '#0a84ff', wallBg: '', wall1: '#ff9a8b', wall2: '#7f7fd5', wall3: '#86e3ce', dark: false, alpha: .22, radius: 22, scene: 'none' } },
+    { name: 'Ocean',      set: { accent: '#0a84ff', wallBg: '', wall1: '#4facfe', wall2: '#00f2fe', wall3: '#a18cd1', dark: false, alpha: .20, radius: 22, scene: 'none' } },
+    { name: 'Forest',     set: { accent: '#30b158', wallBg: '', wall1: '#134e5e', wall2: '#71b280', wall3: '#d4fc79', dark: false, alpha: .24, radius: 22, scene: 'none' } },
+    { name: 'Rose',       set: { accent: '#ff375f', wallBg: '', wall1: '#ffafbd', wall2: '#ffc3a0', wall3: '#c471f5', dark: false, alpha: .22, radius: 22, scene: 'none' } },
+    { name: 'Peach',      set: { accent: '#ff9f0a', wallBg: '', wall1: '#ffecd2', wall2: '#fcb69f', wall3: '#ff8177', dark: false, alpha: .22, radius: 22, scene: 'none' } },
+    { name: 'Midnight',   set: { accent: '#5e5ce6', wallBg: '', wall1: '#1d2b64', wall2: '#4b1d64', wall3: '#0f3443', dark: true,  alpha: .18, radius: 22, scene: 'none' } },
+    { name: 'Neon',       set: { accent: '#f72585', wallBg: '', wall1: '#f72585', wall2: '#4361ee', wall3: '#4cc9f0', dark: true,  alpha: .16, radius: 22, scene: 'none' } },
+    { name: 'Graphite',   set: { accent: '#8e8e93', wallBg: '', wall1: '#3a3a40', wall2: '#6b6b75', wall3: '#202024', dark: true,  alpha: .20, radius: 22, scene: 'none' } },
   ],
   /* Default pens. Every knob is explained in PEN_PARAMS below.
      style: 'smooth' = filled vector outline, 'classic' = stroked segments */
@@ -654,8 +708,8 @@ const CONFIG = {
     { id: 'marker',   name: 'Marker',    style: 'smooth',  size: 5,   thinning: .05, streamline: .35, smoothing: .3,  taperStart: 0,  taperEnd: 0,  speed: 0,   opacity: .82 },
     { id: 'classic',  name: 'Classic',   style: 'classic', size: 3,   thinning: .55, streamline: 0,   smoothing: 0,   taperStart: 0,  taperEnd: 0,  speed: 0,   opacity: 1 },
   ],
-  defaults: { accent: '#0a84ff', wall1: '#ff9a8b', wall2: '#7f7fd5', wall3: '#86e3ce',
-              blur: 22, alpha: .22, sat: 180, radius: 22, dark: false, refract: false, snap: true, fixedPressure: false, tbTop: false,
+  defaults: { accent: '#0a84ff', wallBg: '', wall1: '#ff9a8b', wall2: '#7f7fd5', wall3: '#86e3ce',
+              blur: 22, alpha: .22, sat: 180, radius: 22, dark: false, refract: false, scene: 'none', wallImgId: '', buddyImgId: '', buddySize: 88, customThemes: [], snap: true, fixedPressure: false, tbTop: false,
               navKeys: { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' },
               fingerDraws: !matchMedia('(pointer:coarse)').matches, gdriveClientId: '', gdriveAuto: true, collabRelay: '', collabName: '' },
 };
@@ -791,6 +845,7 @@ function load() {
   if (!d || !Array.isArray(d.notebooks)) d = { notebooks: [] };
   d.settings = Object.assign({}, CONFIG.defaults, d.settings || {});
   d.settings.navKeys = Object.assign({}, CONFIG.defaults.navKeys, d.settings.navKeys || {});
+  if (!Array.isArray(d.settings.customThemes)) d.settings.customThemes = [];
   if (!Array.isArray(d.pens) || !d.pens.length) d.pens = clone(CONFIG.pens);
   d.ui = Object.assign({ penId: d.pens[0].id, penColor: CONFIG.penColors[0], penSize: 1, hlColor: CONFIG.hlColors[0], hlSize: 1,
     eraserSize: 1, eraserMode: 'stroke', eraserHlOnly: false, lassoMode: 'free', zoomLock: false,
@@ -849,40 +904,219 @@ addEventListener('pagehide', () => save(true));
 addEventListener('beforeunload', () => save(true));
 
 /* ============================== SETTINGS ============================== */
+const THEME_KEYS = ['accent', 'wallBg', 'wall1', 'wall2', 'wall3', 'blur', 'alpha', 'sat', 'radius', 'dark', 'refract', 'scene', 'wallImgId', 'buddyImgId', 'buddySize'];
+const pickThemeVars = s => { const o = {}; THEME_KEYS.forEach(k => { if (s[k] !== undefined) o[k] = s[k]; }); return o; };
+const THEME_SCENES = {
+  poyo: {
+    label: 'Dreamland',
+    wall: `<svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+      <g class="wfloat" opacity=".55">
+        <path d="M90 175c0-26 22-46 49-46 18 0 34 9 42 23 7-5 15-8 25-8 23 0 42 18 42 40s-19 39-42 39H134c-25 0-44-21-44-48Z" fill="#fff"/>
+        <path d="M880 650c0-30 25-54 57-54 20 0 38 10 47 26 9-6 19-10 30-10 27 0 49 21 49 46s-22 46-49 46H932c-29 0-52-24-52-54Z" fill="#fff"/>
+      </g>
+      <g class="wtwinkle" fill="#ffd95a">
+        <path d="M180 420l6 15 15 6-15 6-6 15-6-15-15-6 15-6Z"/>
+        <path d="M1010 150l9 22 22 9-22 9-9 22-9-22-22-9 22-9Z"/>
+        <path d="M340 120l5 12 12 5-12 5-5 12-5-12-12-5 12-5Z" opacity=".8"/>
+        <path d="M740 690l7 17 17 7-17 7-7 17-7-17-17-7 17-7Z" opacity=".75"/>
+      </g>
+      <circle cx="960" cy="240" r="10" fill="#ffe680" opacity=".65"/>
+      <circle cx="240" cy="600" r="8" fill="#ffb3d1" opacity=".65"/>
+    </svg>`,
+    buddy: `<svg viewBox="0 0 120 120">
+      <defs>
+        <radialGradient id="pBody" cx="38%" cy="32%" r="65%"><stop offset="0%" stop-color="#ffd6e8"/><stop offset="65%" stop-color="#ff94bd"/><stop offset="100%" stop-color="#ff6b9d"/></radialGradient>
+        <linearGradient id="pStar" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#fff49c"/><stop offset="100%" stop-color="#ffaa1d"/></linearGradient>
+      </defs>
+      <g transform="rotate(-12 68 88)">
+        <path d="M60 46l9 22 24 2-18 15 6 23-21-12-21 12 6-23-18-15 24-2Z" fill="url(#pStar)" stroke="#f08c00" stroke-width="2" stroke-linejoin="round"/>
+      </g>
+      <ellipse cx="42" cy="84" rx="14" ry="8" transform="rotate(-12 42 84)" fill="#d61c59"/>
+      <ellipse cx="76" cy="82" rx="14" ry="8" transform="rotate(14 76 82)" fill="#e11d62"/>
+      <ellipse cx="26" cy="54" rx="11" ry="8" transform="rotate(-26 26 54)" fill="#ff85b3"/>
+      <ellipse cx="92" cy="52" rx="11" ry="8" transform="rotate(24 92 52)" fill="#ff85b3"/>
+      <circle cx="59" cy="56" r="32" fill="url(#pBody)" stroke="#f0568c" stroke-width="2"/>
+      <ellipse cx="48" cy="49" rx="4.6" ry="8.8" fill="#18204c"/>
+      <ellipse cx="67" cy="49" rx="4.6" ry="8.8" fill="#18204c"/>
+      <ellipse cx="48" cy="45" rx="2.3" ry="3.4" fill="#fff"/>
+      <ellipse cx="67" cy="45" rx="2.3" ry="3.4" fill="#fff"/>
+      <ellipse cx="48" cy="54" rx="2.6" ry="1.8" fill="#4f8ef7"/>
+      <ellipse cx="67" cy="54" rx="2.6" ry="1.8" fill="#4f8ef7"/>
+      <ellipse cx="38" cy="58" rx="6" ry="3.6" fill="#ff477e" opacity=".7"/>
+      <ellipse cx="77" cy="58" rx="6" ry="3.6" fill="#ff477e" opacity=".7"/>
+      <path d="M54 61c2.5 4.2 6.5 4.2 9 0" fill="none" stroke="#801336" stroke-width="2.4" stroke-linecap="round"/>
+    </svg>`
+  },
+  sakura: {
+    label: 'Sakura',
+    wall: `<svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+      <g class="wfloat" fill="#ffb8d0" opacity=".55">
+        <path d="M160 190c14-12 28-4 28 10s-14 22-28 14c-12-8-14-16 0-24Z"/>
+        <path d="M340 310c10-12 22-6 24 6s-12 18-24 12c-10-6-10-12 0-18Z" opacity=".7"/>
+        <path d="M980 220c14-12 28-4 28 10s-14 22-28 14c-12-8-14-16 0-24Z"/>
+        <path d="M840 620c12-10 24-3 24 9s-12 18-24 12c-10-6-12-14 0-21Z" opacity=".75"/>
+        <path d="M220 640c12-10 24-3 24 9s-12 18-24 12c-10-6-12-14 0-21Z" opacity=".65"/>
+      </g>
+    </svg>`,
+    buddy: `<svg viewBox="0 0 120 120">
+      <g transform="translate(60 62)">
+        <g fill="#ffb3cd" stroke="#f2749f" stroke-width="1.8">
+          <path d="M0-38c10 0 16 14 10 26L0-6-10-12C-16-24-10-38 0-38Z" transform="rotate(0)"/>
+          <path d="M0-38c10 0 16 14 10 26L0-6-10-12C-16-24-10-38 0-38Z" transform="rotate(72)"/>
+          <path d="M0-38c10 0 16 14 10 26L0-6-10-12C-16-24-10-38 0-38Z" transform="rotate(144)"/>
+          <path d="M0-38c10 0 16 14 10 26L0-6-10-12C-16-24-10-38 0-38Z" transform="rotate(216)"/>
+          <path d="M0-38c10 0 16 14 10 26L0-6-10-12C-16-24-10-38 0-38Z" transform="rotate(288)"/>
+        </g>
+        <circle r="8" fill="#ffe27a" stroke="#f09d2c" stroke-width="1.6"/>
+      </g>
+    </svg>`
+  },
+  starry: {
+    label: 'Starry',
+    wall: `<svg viewBox="0 0 1200 800" preserveAspectRatio="xMidYMid slice">
+      <g class="wtwinkle" fill="#fff0a8" opacity=".65">
+        <path d="M200 180l7 18 18 7-18 7-7 18-7-18-18-7 18-7Z"/>
+        <path d="M980 190l6 15 15 6-15 6-6 15-6-15-15-6 15-6Z"/>
+        <path d="M880 610l8 20 20 8-20 8-8 20-8-20-20-8 20-8Z"/>
+        <circle cx="420" cy="240" r="3"/><circle cx="760" cy="140" r="4"/><circle cx="290" cy="590" r="3.5"/>
+      </g>
+    </svg>`,
+    buddy: `<svg viewBox="0 0 120 120">
+      <path d="M68 20a36 36 0 1 0 32 52 28 28 0 1 1-32-52Z" fill="#ffe478" stroke="#f5a623" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M88 30l4 10 10 4-10 4-4 10-4-10-10-4 10-4Z" fill="#fff5b8"/>
+    </svg>`
+  }
+};
+const assetUrls = new Map();
+let assetToken = 0;
+async function loadAssetUrl(id) {
+  if (!id || typeof fileStore === 'undefined') return '';
+  if (assetUrls.has(id)) return assetUrls.get(id);
+  const b = await fileStore.get(id); if (!b) return '';
+  const u = URL.createObjectURL(b); assetUrls.set(id, u); return u;
+}
+async function applyThemeAssets() {
+  const s = db.settings, tok = ++assetToken;
+  const wa = $('#wallArt'), wi = $('#wallImg'), bd = $('#buddy');
+  const sc = THEME_SCENES[s.scene || 'none'];
+  if (wa) wa.innerHTML = sc ? sc.wall : '';
+  document.documentElement.style.setProperty('--buddy-size', (s.buddySize || 88) + 'px');
+  const [wUrl, bUrl] = await Promise.all([loadAssetUrl(s.wallImgId), loadAssetUrl(s.buddyImgId)]);
+  if (tok !== assetToken) return;
+  if (wi) {
+    wi.src = wUrl || '';
+    document.body.classList.toggle('has-wall-img', !!wUrl);
+  }
+  if (bd) {
+    if (bUrl) bd.innerHTML = `<img src="${bUrl}" alt="">`;
+    else bd.innerHTML = sc ? sc.buddy : '';
+  }
+  const wt = $('#wallImgThumb'), wc = $('#clearWallImg'), bt = $('#buddyImgThumb'), bc = $('#clearBuddyImg');
+  if (wt && wc) { wt.src = wUrl || ''; wt.classList.toggle('hidden', !wUrl); wc.classList.toggle('hidden', !wUrl); }
+  if (bt && bc) { bt.src = bUrl || ''; bt.classList.toggle('hidden', !bUrl); bc.classList.toggle('hidden', !bUrl); }
+}
+function gcThemeAssets(prevId) {
+  if (!prevId) return;
+  const used = new Set([db.settings.wallImgId, db.settings.buddyImgId]);
+  (db.settings.customThemes || []).forEach(t => { if (t.set) { used.add(t.set.wallImgId); used.add(t.set.buddyImgId); } });
+  if (!used.has(prevId)) {
+    const u = assetUrls.get(prevId); if (u) { URL.revokeObjectURL(u); assetUrls.delete(prevId); }
+    if (typeof fileStore !== 'undefined') fileStore.del(prevId);
+  }
+}
 function applySettings() {
   const s = db.settings, r = document.documentElement.style;
   r.setProperty('--accent', s.accent);
+  if (s.wallBg) r.setProperty('--bg', s.wallBg); else r.removeProperty('--bg');
   r.setProperty('--wall-1', s.wall1); r.setProperty('--wall-2', s.wall2); r.setProperty('--wall-3', s.wall3);
   r.setProperty('--glass-blur', s.blur + 'px'); r.setProperty('--glass-alpha', s.alpha);
   r.setProperty('--glass-sat', s.sat + '%'); r.setProperty('--glass-radius', s.radius + 'px');
+  const tc = $('meta[name="theme-color"]'); if (tc) tc.content = s.wallBg || (s.dark ? '#0b0b0f' : s.wall2);
   document.body.classList.toggle('dark', !!s.dark);
   document.body.classList.toggle('refract', !!s.refract);
   if (typeof updateGlassContrast === 'function') updateGlassContrast();
   if (document.body.classList.contains('tb-top') !== !!s.tbTop) { document.body.classList.toggle('tb-top', !!s.tbTop); if (typeof resizeStage === 'function') resizeStage(); }
+  applyThemeAssets();
   if ($('#themePresets')) renderThemePresets();
   $$('[data-out]').forEach(o => { const k = o.dataset.out, v = s[k]; o.textContent = k === 'alpha' ? Math.round(v * 100) + '%' : k === 'sat' ? v + '%' : v + 'px'; });
 }
 function syncSettingsForm() {
-  $$('[data-set]').forEach(i => { const v = db.settings[i.dataset.set]; if (i.type === 'checkbox') i.checked = !!v; else i.value = v; });
+  $$('[data-set]').forEach(i => {
+    const k = i.dataset.set, v = db.settings[k];
+    if (i.type === 'checkbox') i.checked = !!v;
+    else if (k === 'wallBg') i.value = v || (db.settings.dark ? '#0b0b0f' : '#eef0f6');
+    else i.value = v;
+  });
+  const ss = $('#themeSceneSeg');
+  if (ss) segControl(ss, [{ value: 'none', label: 'None' }, { value: 'poyo', label: 'Dreamland' }, { value: 'sakura', label: 'Sakura' }, { value: 'starry', label: 'Starry' }], db.settings.scene || 'none', v => {
+    db.settings.scene = v; db.settingsUpdated = Date.now(); syncSettingsForm(); scheduleSave();
+  });
   applySettings();
 }
 $$('[data-set]').forEach(i => i.addEventListener('input', () => {
   const k = i.dataset.set;
   db.settings[k] = i.type === 'checkbox' ? i.checked : i.type === 'range' ? +i.value : i.value;
+  if (k === 'dark') {
+    if (db.settings.wallBg && typeof lum === 'function' && (!!db.settings.dark === (lum(db.settings.wallBg) > .5))) db.settings.wallBg = '';
+    const wb = $('[data-set="wallBg"]'); if (wb && !db.settings.wallBg) wb.value = db.settings.dark ? '#0b0b0f' : '#eef0f6';
+  }
   if (k === 'fingerDraws' && i.checked) penSeen = false;
   db.settingsUpdated = Date.now();
   applySettings(); scheduleSave();
 }));
+function renderThemeTile(th, customIdx = -1) {
+  const v = th.set, wrap = el('div', 'theme-item');
+  const active = Object.keys(v).every(k => db.settings[k] === v[k]);
+  const avgL = typeof lum === 'function' ? (lum(v.wall1 || '#888') + lum(v.wall2 || '#888') + lum(v.wall3 || '#888')) / 3 : 0.5;
+  const b = el('button', 'theme-tile' + (active ? ' on' : '') + (!v.dark && avgL > .68 ? ' light-tile' : ''));
+  const base = v.wallBg || (v.dark ? '#15151b' : v.wall2);
+  b.style.background = `radial-gradient(at 15% 15%,${v.wall1},transparent 65%),radial-gradient(at 90% 30%,${v.wall2},transparent 60%),radial-gradient(at 50% 110%,${v.wall3},transparent 70%),${base}`;
+  b.innerHTML = `<i style="background:${v.accent}"></i><span></span>`; $('span', b).textContent = th.name;
+  b.onclick = () => { Object.assign(db.settings, v); db.settingsUpdated = Date.now(); syncSettingsForm(); scheduleSave(); };
+  wrap.append(b);
+  if (customIdx >= 0) {
+    const del = el('button', 'theme-del', '×'); del.title = 'Delete custom theme';
+    del.onclick = e => {
+      e.stopPropagation();
+      if (!del.dataset.armed) {
+        del.dataset.armed = 1; del.classList.add('armed'); del.textContent = 'Delete?';
+        setTimeout(() => { if (del.isConnected) { delete del.dataset.armed; del.classList.remove('armed'); del.textContent = '×'; } }, 2500);
+        return;
+      }
+      const [removed] = db.settings.customThemes.splice(customIdx, 1);
+      if (removed && removed.set) { gcThemeAssets(removed.set.wallImgId); gcThemeAssets(removed.set.buddyImgId); }
+      db.settingsUpdated = Date.now(); renderThemePresets(); scheduleSave(); toast(`Deleted "${th.name}"`);
+    };
+    wrap.append(del);
+  }
+  return wrap;
+}
 function renderThemePresets() {
   const host = $('#themePresets'); host.innerHTML = '';
-  CONFIG.themes.forEach(th => {
-    const v = th.set, b = el('button', Object.keys(v).every(k => db.settings[k] === v[k]) ? 'on' : '');
-    b.style.background = `radial-gradient(at 15% 15%,${v.wall1},transparent 65%),radial-gradient(at 90% 30%,${v.wall2},transparent 60%),radial-gradient(at 50% 110%,${v.wall3},transparent 70%),${v.dark ? '#15151b' : v.wall2}`;
-    b.innerHTML = `<i style="background:${v.accent}"></i><span></span>`; $('span', b).textContent = th.name;
-    b.onclick = () => { Object.assign(db.settings, v); db.settingsUpdated = Date.now(); syncSettingsForm(); scheduleSave(); };
-    host.append(b);
-  });
+  CONFIG.themes.forEach(th => host.append(renderThemeTile(th)));
+  const ch = $('#customThemes'); if (!ch) return; ch.innerHTML = '';
+  const list = db.settings.customThemes || [];
+  if (!list.length) { ch.append(el('div', 'themes-empty', 'Tweak colours, scenes or upload images below, then save your own theme here.')); return; }
+  list.forEach((th, idx) => ch.append(renderThemeTile(th, idx)));
 }
+const bindAssetPicker = (btnId, clearId, inputId, key, label) => {
+  const btn = $(btnId), clr = $(clearId), inp = $(inputId);
+  if (!btn || !clr || !inp) return;
+  btn.onclick = () => inp.click();
+  inp.onchange = async () => {
+    const f = inp.files[0]; inp.value = ''; if (!f || typeof fileStore === 'undefined') return;
+    const prev = db.settings[key], id = 'asset-' + uid();
+    await fileStore.put(id, f);
+    db.settings[key] = id; db.settingsUpdated = Date.now();
+    gcThemeAssets(prev); applySettings(); scheduleSave(); toast(`${label} updated`);
+  };
+  clr.onclick = () => {
+    const prev = db.settings[key]; db.settings[key] = ''; db.settingsUpdated = Date.now();
+    gcThemeAssets(prev); applySettings(); scheduleSave(); toast(`${label} removed`);
+  };
+};
+bindAssetPicker('#pickWallImg', '#clearWallImg', '#wallImgFile', 'wallImgId', 'Wallpaper');
+bindAssetPicker('#pickBuddyImg', '#clearBuddyImg', '#buddyImgFile', 'buddyImgId', 'Corner sticker');
 let setPane = 'theme';
 function openSettings(pane) {
   setPane = pane || (cur ? 'page' : 'theme');
@@ -973,7 +1207,18 @@ function applyPage(ch, quiet) {
   scheduleSave();
   if (!quiet) renderPagePane();
 }
-$('#resetTheme').onclick = () => { const keep = { fingerDraws: db.settings.fingerDraws, snap: db.settings.snap, fixedPressure: db.settings.fixedPressure, navKeys: db.settings.navKeys, tbTop: db.settings.tbTop }; db.settings = Object.assign({}, CONFIG.defaults, keep); syncSettingsForm(); scheduleSave(); };
+$('#saveCustomTheme').onclick = () => {
+  const inp = $('#customThemeName'), list = db.settings.customThemes || (db.settings.customThemes = []);
+  const name = (inp.value || '').trim() || `Custom ${list.length + 1}`;
+  list.push({ id: uid(), name, set: pickThemeVars(db.settings) });
+  inp.value = ''; db.settingsUpdated = Date.now(); renderThemePresets(); scheduleSave(); toast(`Saved "${name}"`);
+};
+$('#resetTheme').onclick = () => {
+  const prevW = db.settings.wallImgId, prevB = db.settings.buddyImgId;
+  const keep = { fingerDraws: db.settings.fingerDraws, snap: db.settings.snap, fixedPressure: db.settings.fixedPressure, navKeys: db.settings.navKeys, tbTop: db.settings.tbTop, customThemes: db.settings.customThemes || [] };
+  db.settings = Object.assign({}, CONFIG.defaults, keep); db.settingsUpdated = Date.now();
+  gcThemeAssets(prevW); gcThemeAssets(prevB); syncSettingsForm(); scheduleSave();
+};
 
 /* ============================== UI HELPERS ============================== */
 let toastTimer = 0;
@@ -2848,7 +3093,7 @@ async function gdriveFindFile() {
   if (id) gdriveMeta({ fileId: id });
   return id;
 }
-async function collectBgFiles(notebooks) {
+async function collectBgFiles(notebooks, settings = db.settings) {
   const files = {};
   for (const nb of notebooks) for (const pg of nb.pages || []) {
     if (pg.bg && pg.bg.id && !files[pg.bg.id]) {
@@ -2856,6 +3101,9 @@ async function collectBgFiles(notebooks) {
       if (b) files[pg.bg.id] = await blobToDataURL(b);
     }
   }
+  const tids = [settings && settings.wallImgId, settings && settings.buddyImgId];
+  (settings && settings.customThemes || []).forEach(t => { if (t.set) tids.push(t.set.wallImgId, t.set.buddyImgId); });
+  for (const id of tids) if (id && !files[id]) { const b = await fileStore.get(id); if (b) files[id] = await blobToDataURL(b); }
   return files;
 }
 async function restoreBgFiles(files) {
