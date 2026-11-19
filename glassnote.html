@@ -1615,10 +1615,15 @@ function trySnap() {
 const touches = new Map();
 const onStageDown = e => {
   const wasEditing = !!te; commitText(); hideMenu();
-  if (e.pointerType === 'pen' && !penSeen) { penSeen = true; if (db.settings.fingerDraws) toast('Stylus detected — fingers now scroll & zoom'); }
+  if (e.pointerType === 'pen') {
+    if (!penSeen) { penSeen = true; if (db.settings.fingerDraws) toast('Stylus detected — fingers now scroll & zoom'); }
+    // Stylus always takes priority over an accidental palm pan/pinch
+    if (g && (g.type === 'pan' || g.type === 'pinch')) { cancelGesture(); touches.clear(); }
+  }
   try { stage.setPointerCapture(e.pointerId); } catch (_) {}
   const sp = loc(e);
   if (e.pointerType === 'touch') {
+    if (g && g.type === 'draw') return; // ignore palm touches while actively drawing with stylus
     touches.set(e.pointerId, sp);
     if (touches.size === 2) { if (g && g.type !== 'pinch') cancelGesture(); startPinch(); return; }
     if (touches.size > 2 || g) return;
@@ -2059,6 +2064,7 @@ function bindStage(el, pane) {     // the same handlers drive both panes; a pane
   el.addEventListener('pointermove', e => { if (activePane === pane) onStageMove(e); else updateEraserCursor(e); });
   el.addEventListener('pointerup', e => { if (activePane === pane) endPointer(e); });
   el.addEventListener('pointercancel', e => { if (activePane === pane) endPointer(e); });
+  el.addEventListener('lostpointercapture', e => { if (activePane === pane) endPointer(e); });
   el.addEventListener('wheel', e => { e.preventDefault(); if (act()) onStageWheel(e); }, { passive: false });
   el.addEventListener('pointerleave', () => ec.style.display = 'none');
   el.addEventListener('dragover', e => e.preventDefault());
